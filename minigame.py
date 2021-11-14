@@ -1,49 +1,34 @@
-import random
-
+from random import randint
+from menu import *
 
 # Definindo funções
 
+
 def movimentoInimigo(enemyPosition):
-    opcaoInimigo = random.randint(1,4)
-    if opcaoInimigo == 1: enemyPosition -= 10;
-    if opcaoInimigo == 2: enemyPosition += 1;
-    if opcaoInimigo == 3: enemyPosition += 10;
-    if opcaoInimigo == 4: enemyPosition -= 1;
-
-
-def menuOpcao():
-    print("-=" * 35)
-    print("Esse é o menu de opções, aqui poderá escolher algumas configurações que lhe agradem!")
     while True:
-        numeroInimigos = input(f"Insira o número de inimigos em jogo entre 1 e 3: ")
-
-        if numeroInimigos not in "123": print("Opção inválida!");
-        else: numeroInimigos = int(numeroInimigos);print("-=" * 35); break;
-
-
-def menuAjuda():
-    print("-=" * 35)
-    print("Olá, seja bem vindo ao menu de ajudas!")
-    print(""" --> W - CIMA\n --> D - DIREITA\n --> S - BAIXO\n --> A - ESQUERDA""")
-    print(f"-> {player} é a sua posição atual.")
-    print(f"-> [ ] são espaços em branco, você pode mover-se para eles.")
-    print(f"-> {objective} é o objetivo, deve mover-se até atingir ele. ")
-    print(f"-> {enemy} é um inimigo, evite-o à qualquer custo!")
-    print("-=" * 35)
-    input("Pressione ENTER para continuar: ")
+        opcaoInimigo = randint(1,4)
+        enemyNewPosition = enemyPosition
+        if opcaoInimigo == 1: enemyNewPosition -= 10;
+        if opcaoInimigo == 2: enemyNewPosition += 1;
+        if opcaoInimigo == 3: enemyNewPosition += 10;
+        if opcaoInimigo == 4: enemyNewPosition -= 1;
+        if enemyNewPosition != "\n" and enemyNewPosition != objectivePosition:
+            enemyPosition = enemyNewPosition
+            return enemyPosition
 
 
-def verificarMovimento(nova_posicao):
+def verificarMovimento(nova_posicao, playerPosition, move):
     if (nova_posicao < 0) or (nova_posicao > 49) or \
             ((playerPosition in (9, 19, 29, 39, "\n")) and move == "D") or \
             ((playerPosition in (0, 10, 20, 30, 40, "\n")) and move == "A"):
         return True
 
 
-def retornar():
-    for c in range(len(line0)):
-        if line0[c] == player:
-            line0[c] = playerPosition
+def verificarMovimentoInimigo(enemyNewPosition, enemyPosition, move):
+    if (enemyNewPosition < 0) or (enemyNewPosition > 49) or \
+            ((enemyPosition in (9, 19, 29, 39, "\n")) and move == "D") or \
+            ((enemyPosition in (0, 10, 20, 30, 40, "\n")) and move == "A"):
+        return True
 
 
 def move_up(position):
@@ -66,12 +51,19 @@ def move_left(position):
     return position
 
 
-# Definindo variaveis
+def retornarVazio():
+    for c in range(len(line0)):
+        if line0[c] == player:
+            line0[c] = playerPosition
 
 
-enemy = "\033[1;31mX\033[m"
-objective = "\033[1;33m#\033[m"
-player = "\033[1;32mO\033[m"
+def retornarVazioInimigo():
+    for c in range(len(line0)):
+        if line0[c] == enemy:
+            line0[c] = enemyPosition
+
+
+# Definindo variáveis
 numeroInimigos = 1
 
 # Menu inicial
@@ -100,46 +92,50 @@ while True:
         menuAjuda()
     if opcaoInicial == "1": break;
 
-
-
 # coisas para adicionar:  opção do objetivo andar, teleporte, salvar,
 
 
 playerPosition = 0
-objectivePosition = random.randint(1, 49)
-enemyPosition = random.randint(1, 49)
+derrota = False
+objectivePosition = randint(1, 49)
+enemyPosition = randint(1, 49)
+while enemyPosition == objectivePosition:
+    enemyPosition = randint(1, 49)
+
 
 print("BOA SORTE!")
 print("-=" * 35)
 
-while enemyPosition != objectivePosition:
-    objectivePosition = random.randint(1, 49)
-    enemyPosition = random.randint(1, 49)
-
 # inicio do jogo
 while playerPosition != objectivePosition:
 
-    # Colocando cada "objeto" em seu lugar no tabuleiro.
     for p in range(len(line0)):
         line0[p] = player if line0[p] == playerPosition else line0[p]
         line0[p] = objective if line0[p] == objectivePosition else line0[p]
+        line0[p] = enemy if line0[p] == enemyPosition else line0[p]
 
     # Criando a parte visual do tabuleiro
     tabuleiro = list()
     for n in range(len(line0)):
         tabuleiro.append(str(line0[n]))
+
     for n in tabuleiro:
-        if n != player and n != objective and n != "\n" and int(n) < 10:
+        if n != player and n != objective and n != enemy and n != "\n" and int(n) < 10:
             n = "[ ]"
         elif n == player and n != "\n":
             n = "[" + player + "]"
         elif n == objective and n != "\n":
             n = "[" + objective + "]"
+        elif n == enemy and n != "\n":
+            n = "[" + enemy + "]";
         elif n != "\n":
             n = "[ ]"
         print(n, end=" ")
     print()
 
+    if playerPosition == enemyPosition:
+        derrota = True
+        break
     # Loop para o jogador escolher a direção, aceitando apenas WASD
     while True:
 
@@ -154,7 +150,7 @@ while playerPosition != objectivePosition:
             if move == "A":
                 nova_posicao = move_left(playerPosition)
 
-            if verificarMovimento(nova_posicao) == True:
+            if verificarMovimento(nova_posicao, playerPosition, move):
                 print("Não é possível sair do mapa..")
             else:
                 break
@@ -163,17 +159,20 @@ while playerPosition != objectivePosition:
 
     # Movendo o "objeto" jogador
     if move == "W":
-        retornar()
+        retornarVazio()
         playerPosition = move_up(playerPosition)
     elif move == "D":
-        retornar()
+        retornarVazio()
         playerPosition = move_right(playerPosition)
     elif move == "S":
-        retornar()
+        retornarVazio()
         playerPosition = move_down(playerPosition)
     else:
-        retornar()
+        retornarVazio()
         playerPosition = move_left(playerPosition)
+    retornarVazioInimigo()
+    enemyPosition = movimentoInimigo(enemyPosition)
+
 
 # Ultima reformulação antes de fechar o game
 for p in range(len(line0)):
@@ -183,14 +182,37 @@ for p in range(len(line0)):
 tabuleiro = list()
 for n in range(len(line0)):
     tabuleiro.append(str(line0[n]))
-for n in tabuleiro:
-    if n != player and n != objective and n != "\n": n = "[ ]";
-    elif n == objective and n != "\n": n = "["+player+"]";
-    elif n == player and n != "\n": n = "["+player+"]";
-    elif n != "\n": n = "[ ]";
-    print(n, end=" ")
+
 print()
 
-print("MEUS PARABÉNS, VOCÊ GANHOU!")
+if derrota:
+    for n in tabuleiro:
+        if n != player and n != objective and n != enemy and n != "\n" and int(n) < 10:
+            n = "[ ]"
+        elif n == player and n != "\n":
+            n = "[" + enemy + "]"
+        elif n == objective and n != "\n":
+            n = "[" + objective + "]"
+        elif n == enemy and n != "\n":
+            n = "[" + enemy + "]"
+        elif n != "\n":
+            n = "[ ]"
+        print(n, end=" ")
+    print()
+    print("Sinto muito, você perdeu!")
+else:
+    for n in tabuleiro:
+        if n != player and n != objective and n != enemy and n != "\n" and int(n) < 10:
+            n = "[ ]"
+        elif n == player and n != "\n":
+            n = "[" + player + "]"
+        elif n == objective and n != "\n":
+            n = "[" + player + "]"
+        elif n == enemy and n != "\n":
+            n = "[" + enemy + "]";
+        elif n != "\n":
+            n = "[ ]"
+        print(n, end=" ")
+    print()
+    print("MEUS PARABÉNS, VOCÊ GANHOU!")
 # Fim do jogo
-
