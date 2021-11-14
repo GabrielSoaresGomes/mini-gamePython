@@ -2,22 +2,36 @@ import random
 
 
 # Definindo funções
+
+def movimentoInimigo(enemyPosition):
+    opcaoInimigo = random.randint(1,4)
+    if opcaoInimigo == 1: enemyPosition -= 10;
+    if opcaoInimigo == 2: enemyPosition += 1;
+    if opcaoInimigo == 3: enemyPosition += 10;
+    if opcaoInimigo == 4: enemyPosition -= 1;
+
+
 def menuOpcao():
+    print("-=" * 35)
     print("Esse é o menu de opções, aqui poderá escolher algumas configurações que lhe agradem!")
     while True:
-        numeroInimigos = input("Insira o número de inimigos em jogo entre 1 à 3: ")
-        try int(numeroInimigos
-        except
+        numeroInimigos = input(f"Insira o número de inimigos em jogo entre 1 e 3: ")
+
+        if numeroInimigos not in "123": print("Opção inválida!");
+        else: numeroInimigos = int(numeroInimigos);print("-=" * 35); break;
 
 
 def menuAjuda():
+    print("-=" * 35)
     print("Olá, seja bem vindo ao menu de ajudas!")
     print(""" --> W - CIMA\n --> D - DIREITA\n --> S - BAIXO\n --> A - ESQUERDA""")
     print(f"-> {player} é a sua posição atual.")
     print(f"-> [ ] são espaços em branco, você pode mover-se para eles.")
     print(f"-> {objective} é o objetivo, deve mover-se até atingir ele. ")
     print(f"-> {enemy} é um inimigo, evite-o à qualquer custo!")
+    print("-=" * 35)
     input("Pressione ENTER para continuar: ")
+
 
 def verificarMovimento(nova_posicao):
     if (nova_posicao < 0) or (nova_posicao > 49) or \
@@ -53,15 +67,12 @@ def move_left(position):
 
 
 # Definindo variaveis
-player = "\033[1;32mO\033[m"
-playerPosition = 0
-objective = "\033[1;33m#\033[m"
-objectivePosition = random.randint(1, 49)
+
+
 enemy = "\033[1;31mX\033[m"
-enemyPosition = random.randint(1, 49)
-while enemyPosition != objectivePosition:
-    objectivePosition = random.randint(1, 49)
-    enemyPosition = random.randint(1, 49)
+objective = "\033[1;33m#\033[m"
+player = "\033[1;32mO\033[m"
+numeroInimigos = 1
 
 # Menu inicial
 print("-=" * 35)
@@ -81,7 +92,7 @@ while True:
     2 - Ajuda
     3 - Opções""")
     opcaoInicial = input("Insira a opção desejada: ")
-    if opcaoInicial not in "12":
+    if opcaoInicial not in "123":
         print("Opção Inválida!")
     if opcaoInicial == "3":
         menuOpcao()
@@ -89,12 +100,21 @@ while True:
         menuAjuda()
     if opcaoInicial == "1": break;
 
+
+
+# coisas para adicionar:  opção do objetivo andar, teleporte, salvar,
+
+
+playerPosition = 0
+objectivePosition = random.randint(1, 49)
+enemyPosition = random.randint(1, 49)
+
 print("BOA SORTE!")
 print("-=" * 35)
 
-# coisas para adicionar: inimigo, opção do objetivo andar, teleporte, salvar,
-# menu de ajudas,
-
+while enemyPosition != objectivePosition:
+    objectivePosition = random.randint(1, 49)
+    enemyPosition = random.randint(1, 49)
 
 # inicio do jogo
 while playerPosition != objectivePosition:
